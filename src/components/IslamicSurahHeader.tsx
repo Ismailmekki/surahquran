@@ -1,15 +1,18 @@
 import React from 'react';
 import { Surah } from '../types';
 import { toArabicNumerals } from './MushafView';
+import { ChevronDown } from 'lucide-react';
 
 interface IslamicSurahHeaderProps {
   surah: Surah;
   showJuzBadge?: boolean;
+  onOpenSurahSelector?: () => void;
 }
 
 export const IslamicSurahHeader: React.FC<IslamicSurahHeaderProps> = ({
   surah,
   showJuzBadge = false,
+  onOpenSurahSelector,
 }) => {
   return (
     <div className="w-full my-5 sm:my-8 flex flex-col items-center select-none text-center">
@@ -24,8 +27,15 @@ export const IslamicSurahHeader: React.FC<IslamicSurahHeaderProps> = ({
         </div>
       )}
 
-      {/* Royal Authentic Quranic Heading (انسيابي وراقي بدون مستطيل ثقيل) */}
-      <div className="relative w-full max-w-xl flex items-center justify-center px-4">
+      {/* Royal Authentic Quranic Heading (انسيابي وراقي) */}
+      <div 
+        className={`relative w-full max-w-xl flex items-center justify-center px-4 ${
+          onOpenSurahSelector ? 'cursor-pointer group' : ''
+        }`}
+        onClick={onOpenSurahSelector}
+        role={onOpenSurahSelector ? 'button' : undefined}
+        title={onOpenSurahSelector ? 'انقر لتغيير السورة' : undefined}
+      >
         {/* Right Flourish Divider */}
         <div className="flex-1 flex items-center justify-end pl-2 sm:pl-4">
           <div className="h-[1.5px] w-full max-w-[120px] bg-gradient-to-l from-amber-400/90 via-orange-400/50 to-transparent rounded-full" />
@@ -34,9 +44,12 @@ export const IslamicSurahHeader: React.FC<IslamicSurahHeaderProps> = ({
 
         {/* Center Name of Surah */}
         <div className="px-4 sm:px-6 py-1 shrink-0">
-          <h1 className="text-2xl sm:text-4xl font-bold font-uthmani text-amber-200 tracking-wide drop-shadow-[0_2px_8px_rgba(245,158,11,0.25)] flex items-center gap-2 sm:gap-3">
+          <h1 className="text-2xl sm:text-4xl font-bold font-uthmani text-amber-200 tracking-wide drop-shadow-[0_2px_8px_rgba(245,158,11,0.25)] flex items-center gap-2 sm:gap-3 group-hover:text-amber-100 transition">
             <span className="text-amber-400 text-sm sm:text-xl">۞</span>
             <span>سُورَةُ {surah.name}</span>
+            {onOpenSurahSelector && (
+              <ChevronDown className="w-4 h-4 text-orange-400/80 group-hover:text-orange-300 transition-transform group-hover:translate-y-0.5" />
+            )}
             <span className="text-amber-400 text-sm sm:text-xl">۞</span>
           </h1>
         </div>
@@ -65,4 +78,3 @@ export const IslamicSurahHeader: React.FC<IslamicSurahHeaderProps> = ({
     </div>
   );
 };
-

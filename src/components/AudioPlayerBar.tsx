@@ -99,10 +99,8 @@ export const AudioPlayerBar: React.FC<AudioPlayerBarProps> = ({
   onAyahEnded,
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const surahDropdownRef = useRef<HTMLDivElement | null>(null);
   const volumeDropdownRef = useRef<HTMLDivElement | null>(null);
   const repeatDropdownRef = useRef<HTMLDivElement | null>(null);
-  const reciterDropdownRef = useRef<HTMLDivElement | null>(null);
   const pauseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const [volume, setVolume] = useState<number>(() => {
@@ -112,11 +110,6 @@ export const AudioPlayerBar: React.FC<AudioPlayerBarProps> = ({
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
-  const [showSurahMenu, setShowSurahMenu] = useState<boolean>(false);
-  const [surahSearchFilter, setSurahSearchFilter] = useState<string>('');
-  const [showReciterMenu, setShowReciterMenu] = useState<boolean>(false);
-  const [reciterSearchFilter, setReciterSearchFilter] = useState<string>('');
-  const [reciterCategoryFilter, setReciterCategoryFilter] = useState<string>('all');
   const [showRepeatMenu, setShowRepeatMenu] = useState<boolean>(false);
   const [showSpeedMenu, setShowSpeedMenu] = useState<boolean>(false);
   const [showVolumeMenu, setShowVolumeMenu] = useState<boolean>(false);
@@ -156,17 +149,11 @@ export const AudioPlayerBar: React.FC<AudioPlayerBarProps> = ({
   // Close menus on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (surahDropdownRef.current && !surahDropdownRef.current.contains(event.target as Node)) {
-        setShowSurahMenu(false);
-      }
       if (volumeDropdownRef.current && !volumeDropdownRef.current.contains(event.target as Node)) {
         setShowVolumeMenu(false);
       }
       if (repeatDropdownRef.current && !repeatDropdownRef.current.contains(event.target as Node)) {
         setShowRepeatMenu(false);
-      }
-      if (reciterDropdownRef.current && !reciterDropdownRef.current.contains(event.target as Node)) {
-        setShowReciterMenu(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -196,16 +183,6 @@ export const AudioPlayerBar: React.FC<AudioPlayerBarProps> = ({
     e?.stopPropagation();
     setIsMuted(!isMuted);
   };
-
-  const filteredSurahs = ALL_JUZ_AMMA_SURAHS.filter((s) => {
-    if (!surahSearchFilter) return true;
-    const cleanQ = removeDiacritics(surahSearchFilter.toLowerCase());
-    return (
-      removeDiacritics(s.name.toLowerCase()).includes(cleanQ) ||
-      s.englishName.toLowerCase().includes(cleanQ) ||
-      s.id.toString().includes(cleanQ)
-    );
-  });
 
   // Update audio source when surah, ayah, or reciter changes
   useEffect(() => {
@@ -341,92 +318,21 @@ export const AudioPlayerBar: React.FC<AudioPlayerBarProps> = ({
           )}
 
           <div className="flex items-center justify-between gap-2 sm:gap-4">
-            {/* Surah Selector & Current Info */}
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial" ref={surahDropdownRef}>
+            {/* Juz Amma Brand Info */}
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 sm:flex-initial">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-md border border-orange-400/40 text-white font-bold text-xs shrink-0">
-                {currentAyah.number}
+                <BookOpen className="w-4 h-4 text-white" />
               </div>
 
-              {/* Surah Dropdown Trigger in Player */}
-              <div className="relative min-w-0">
-                <button
-                  id="player-surah-selector-btn"
-                  onClick={() => setShowSurahMenu(!showSurahMenu)}
-                  className="flex items-center gap-1.5 text-right p-1 -m-1 rounded-xl hover:bg-zinc-800/80 transition group touch-manipulation max-w-full"
-                  title="انقر لتغيير السورة"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1">
-                      <span className="font-bold text-white text-xs sm:text-sm truncate group-hover:text-orange-400 transition">
-                        سورة {currentSurah.name}
-                      </span>
-                      <ChevronDown className={`w-3.5 h-3.5 text-orange-400 shrink-0 transition-transform ${showSurahMenu ? 'rotate-180' : ''}`} />
-                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-orange-950/80 text-orange-300 border border-orange-700/50 hidden xs:inline shrink-0">
-                        الآية {currentAyah.number}
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-zinc-400 truncate max-w-[130px] sm:max-w-[180px]">
-                      {selectedReciter.name}
-                    </div>
-                  </div>
-                </button>
-
-                {/* Surah Selection Popup */}
-                {showSurahMenu && (
-                  <div className="fixed inset-x-2 sm:inset-x-auto sm:right-auto sm:left-auto bottom-24 sm:absolute sm:bottom-full sm:mb-3 sm:right-0 w-auto sm:w-80 bg-[#22252e] border border-zinc-700 rounded-3xl shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 max-h-[60vh] sm:max-h-[65vh] flex flex-col">
-                    <div className="p-1 mb-2 border-b border-zinc-700/80 flex items-center justify-between gap-2">
-                      <input
-                        type="text"
-                        placeholder="ابحث عن سورة بالاسم أو الرقم..."
-                        value={surahSearchFilter}
-                        autoFocus
-                        onChange={(e) => setSurahSearchFilter(e.target.value)}
-                        className="w-full px-3 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700 text-xs text-white placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                      />
-                      <button
-                        onClick={() => setShowSurahMenu(false)}
-                        className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white text-xs shrink-0"
-                      >
-                        إغلاق
-                      </button>
-                    </div>
-
-                    <div className="text-[11px] font-semibold text-orange-400 px-2 py-1 flex items-center justify-between">
-                      <span>سور جزء عم (37 سورة)</span>
-                      <span className="text-zinc-500 text-[10px]">اختر سورة للتلاوة</span>
-                    </div>
-
-                    <div className="overflow-y-auto space-y-1 p-1 divide-y divide-zinc-800/40">
-                      {filteredSurahs.map((s) => (
-                        <button
-                          key={s.id}
-                          onClick={() => {
-                            onSelectSurah(s);
-                            setShowSurahMenu(false);
-                            setSurahSearchFilter('');
-                          }}
-                          className={`w-full px-2.5 py-2 rounded-xl text-right text-xs flex items-center justify-between transition ${
-                            s.id === currentSurah.id
-                              ? 'bg-orange-500 text-white font-bold shadow-xs'
-                              : 'text-zinc-200 hover:bg-zinc-800 hover:text-white active:bg-zinc-750'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className={`w-6 h-6 rounded-lg text-[11px] flex items-center justify-center font-bold ${
-                              s.id === currentSurah.id ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-orange-400 border border-zinc-700'
-                            }`}>
-                              {s.id}
-                            </span>
-                            <span className="font-semibold text-xs sm:text-sm">سورة {s.name}</span>
-                          </div>
-                          <span className={`text-[10px] ${s.id === currentSurah.id ? 'text-orange-100' : 'text-zinc-400'}`}>
-                            {s.numberOfAyahs} آيات • {s.revelationType}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-amber-200 text-sm sm:text-base font-uthmani tracking-wide truncate">
+                    جُزْءُ عَمَّ
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-950/80 text-orange-300 border border-orange-700/50 hidden xs:inline shrink-0 font-arabic">
+                    الجزء ٣٠
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -468,140 +374,8 @@ export const AudioPlayerBar: React.FC<AudioPlayerBarProps> = ({
               </button>
             </div>
 
-            {/* Reciter & Tools Settings */}
+            {/* Tools Settings */}
             <div className="flex items-center gap-1.5 sm:gap-2">
-              {/* Reciter Selector */}
-              <div className="relative" ref={reciterDropdownRef}>
-                <button
-                  id="reciter-selector-btn"
-                  onClick={() => setShowReciterMenu(!showReciterMenu)}
-                  className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs border border-zinc-700 hover:border-orange-500 transition touch-manipulation"
-                  title="تغيير القارئ والتلاوة"
-                >
-                  <User className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-                  <span className="hidden md:inline truncate max-w-[120px]">{selectedReciter.name}</span>
-                  <span className="md:hidden text-[11px]">القارئ ({RECITERS.length})</span>
-                </button>
-
-                {showReciterMenu && (
-                  <div className="fixed inset-x-2 sm:inset-x-auto bottom-24 sm:absolute sm:bottom-full sm:mb-2 sm:left-0 sm:right-auto md:right-0 md:left-auto w-auto sm:w-80 md:w-96 bg-[#22252e] border border-zinc-700 rounded-3xl shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 max-h-[70vh] sm:max-h-[75vh] flex flex-col">
-                    {/* Header */}
-                    <div className="flex items-center justify-between pb-2 border-b border-zinc-700/80 mb-2">
-                      <div className="flex items-center gap-2 text-orange-400 font-bold text-xs sm:text-sm">
-                        <User className="w-4 h-4" />
-                        <span>اختر القارئ والتلاوة ({RECITERS.length} قارئ ورواية)</span>
-                      </div>
-                      <button
-                        onClick={() => setShowReciterMenu(false)}
-                        className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white text-xs"
-                      >
-                        إغلاق
-                      </button>
-                    </div>
-
-                    {/* Search bar */}
-                    <div className="mb-2">
-                      <input
-                        type="text"
-                        placeholder="ابحث باسم القارئ أو الرواية..."
-                        value={reciterSearchFilter}
-                        onChange={(e) => setReciterSearchFilter(e.target.value)}
-                        className="w-full px-3 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700 text-xs text-white placeholder-zinc-400 focus:outline-hidden focus:border-orange-500"
-                      />
-                    </div>
-
-                    {/* Category Filter Chips */}
-                    <div className="flex items-center gap-1 overflow-x-auto pb-2 mb-1 scrollbar-none text-[10px]">
-                      {[
-                        { id: 'all', label: 'الكل' },
-                        { id: 'المصحف المعلم', label: 'المصحف المعلم (للتحفيظ)' },
-                        { id: 'مرتل', label: 'مرتل' },
-                        { id: 'الحرم المكي', label: 'أئمة الحرمين' },
-                        { id: 'مجود', label: 'تجويد كلاسيكي' },
-                        { id: 'رواية ورش', label: 'رواية ورش' },
-                      ].map((cat) => (
-                        <button
-                          key={cat.id}
-                          onClick={() => setReciterCategoryFilter(cat.id)}
-                          className={`px-2.5 py-1 rounded-lg whitespace-nowrap transition ${
-                            reciterCategoryFilter === cat.id
-                              ? 'bg-orange-500 text-white font-bold'
-                              : 'bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700/60'
-                          }`}
-                        >
-                          {cat.label}
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Reciters List */}
-                    <div className="overflow-y-auto space-y-1 p-1 max-h-64 divide-y divide-zinc-800/40">
-                      {RECITERS.filter((r) => {
-                        const matchesCategory =
-                          reciterCategoryFilter === 'all' ||
-                          (reciterCategoryFilter === 'الحرم المكي' && (r.style === 'الحرم المكي' || r.style === 'الحرم النبوي')) ||
-                          (reciterCategoryFilter === 'مجود' && (r.style === 'مجود' || r.style === 'مجود خاشع')) ||
-                          r.style === reciterCategoryFilter;
-
-                        const cleanQ = reciterSearchFilter.trim().toLowerCase();
-                        const matchesSearch =
-                          !cleanQ ||
-                          r.name.toLowerCase().includes(cleanQ) ||
-                          r.subname.toLowerCase().includes(cleanQ) ||
-                          (r.style && r.style.toLowerCase().includes(cleanQ));
-
-                        return matchesCategory && matchesSearch;
-                      }).map((r) => (
-                        <button
-                          key={r.id}
-                          onClick={() => {
-                            onSelectReciter(r.id);
-                            setShowReciterMenu(false);
-                          }}
-                          className={`w-full text-right p-2 rounded-xl text-xs flex items-center justify-between transition group ${
-                            r.id === reciterId
-                              ? 'bg-orange-500 text-white font-bold shadow-sm'
-                              : 'text-zinc-200 hover:bg-zinc-800 hover:text-white'
-                          }`}
-                        >
-                          <div className="min-w-0 flex-1 pl-2">
-                            <div className="flex items-center gap-1.5">
-                              <span className="truncate">{r.name}</span>
-                              {r.style && (
-                                <span
-                                  className={`text-[9px] px-1.5 py-0.2 rounded-md ${
-                                    r.id === reciterId
-                                      ? 'bg-orange-600 text-white'
-                                      : 'bg-zinc-800 text-orange-400/90 border border-zinc-700'
-                                  }`}
-                                >
-                                  {r.style}
-                                </span>
-                              )}
-                            </div>
-                            <div
-                              className={`text-[10px] truncate ${
-                                r.id === reciterId ? 'text-orange-100' : 'text-zinc-400'
-                              }`}
-                            >
-                              {r.subname}
-                            </div>
-                          </div>
-                          <span
-                            className={`text-[10px] px-1.5 py-0.5 rounded-md ${
-                              r.id === reciterId
-                                ? 'bg-orange-600 text-white'
-                                : 'bg-zinc-800 text-zinc-400'
-                            }`}
-                          >
-                            {r.quality}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
 
               {/* Advanced Quranic Repetition & Hifz Controller (تكرار التحفيظ والاستماع) */}
               <div className="relative" ref={repeatDropdownRef}>
