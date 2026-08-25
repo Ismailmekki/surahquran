@@ -101,6 +101,7 @@ export const AudioPlayerBar: React.FC<AudioPlayerBarProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const volumeDropdownRef = useRef<HTMLDivElement | null>(null);
   const repeatDropdownRef = useRef<HTMLDivElement | null>(null);
+  const reciterDropdownRef = useRef<HTMLDivElement | null>(null);
   const pauseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const [volume, setVolume] = useState<number>(() => {
@@ -110,6 +111,9 @@ export const AudioPlayerBar: React.FC<AudioPlayerBarProps> = ({
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
+  const [showReciterMenu, setShowReciterMenu] = useState<boolean>(false);
+  const [reciterSearchFilter, setReciterSearchFilter] = useState<string>('');
+  const [reciterCategoryFilter, setReciterCategoryFilter] = useState<string>('all');
   const [showRepeatMenu, setShowRepeatMenu] = useState<boolean>(false);
   const [showSpeedMenu, setShowSpeedMenu] = useState<boolean>(false);
   const [showVolumeMenu, setShowVolumeMenu] = useState<boolean>(false);
@@ -154,6 +158,9 @@ export const AudioPlayerBar: React.FC<AudioPlayerBarProps> = ({
       }
       if (repeatDropdownRef.current && !repeatDropdownRef.current.contains(event.target as Node)) {
         setShowRepeatMenu(false);
+      }
+      if (reciterDropdownRef.current && !reciterDropdownRef.current.contains(event.target as Node)) {
+        setShowReciterMenu(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -318,22 +325,156 @@ export const AudioPlayerBar: React.FC<AudioPlayerBarProps> = ({
           )}
 
           <div className="flex items-center justify-between gap-2 sm:gap-4">
-            {/* Juz Amma Brand Info */}
-            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 sm:flex-initial">
+            {/* Juz Amma Brand Info & Reciter Selection under it */}
+            <div className="relative flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 sm:flex-initial" ref={reciterDropdownRef}>
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-md border border-orange-400/40 text-white font-bold text-xs shrink-0">
                 <BookOpen className="w-4 h-4 text-white" />
               </div>
 
               <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-amber-200 text-sm sm:text-base font-uthmani tracking-wide truncate">
+                <div className="flex items-center gap-1.5 leading-tight">
+                  <span className="font-bold text-amber-200 text-xs sm:text-sm font-uthmani tracking-wide truncate">
                     جُزْءُ عَمَّ
                   </span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-950/80 text-orange-300 border border-orange-700/50 hidden xs:inline shrink-0 font-arabic">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-orange-950/80 text-orange-300 border border-orange-700/50 hidden xs:inline shrink-0 font-arabic">
                     الجزء ٣٠
                   </span>
                 </div>
+
+                {/* Reciter selector directly under "جزء عم" */}
+                <button
+                  id="player-reciter-btn"
+                  onClick={() => setShowReciterMenu(!showReciterMenu)}
+                  className="flex items-center gap-1 text-[11px] text-zinc-300 hover:text-amber-300 transition group mt-0.5 max-w-[150px] sm:max-w-[220px] truncate"
+                  title="انقر لاختيار وتغيير القارئ"
+                >
+                  <User className="w-3 h-3 text-orange-400 shrink-0 group-hover:text-amber-300" />
+                  <span className="truncate text-zinc-300 group-hover:text-amber-200">{selectedReciter.name}</span>
+                  <ChevronDown className={`w-3 h-3 text-zinc-400 group-hover:text-amber-300 shrink-0 transition-transform ${showReciterMenu ? 'rotate-180' : ''}`} />
+                </button>
               </div>
+
+              {/* Reciter Selection Modal / Popup */}
+              {showReciterMenu && (
+                <div className="fixed inset-x-2 sm:inset-x-auto bottom-24 sm:absolute sm:bottom-full sm:mb-2 sm:right-0 sm:left-auto w-auto sm:w-84 md:w-96 bg-[#22252e] border border-zinc-700 rounded-3xl shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 max-h-[70vh] sm:max-h-[75vh] flex flex-col text-right">
+                  {/* Header */}
+                  <div className="flex items-center justify-between pb-2 border-b border-zinc-700/80 mb-2">
+                    <div className="flex items-center gap-2 text-orange-400 font-bold text-xs sm:text-sm">
+                      <User className="w-4 h-4" />
+                      <span>اختر القارئ والتلاوة ({RECITERS.length} قارئ ورواية)</span>
+                    </div>
+                    <button
+                      onClick={() => setShowReciterMenu(false)}
+                      className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white text-xs"
+                    >
+                      إغلاق
+                    </button>
+                  </div>
+
+                  {/* Search bar */}
+                  <div className="mb-2">
+                    <input
+                      type="text"
+                      placeholder="ابحث باسم القارئ أو الرواية..."
+                      value={reciterSearchFilter}
+                      autoFocus
+                      onChange={(e) => setReciterSearchFilter(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700 text-xs text-white placeholder-zinc-400 focus:outline-hidden focus:border-orange-500"
+                    />
+                  </div>
+
+                  {/* Category Filter Chips */}
+                  <div className="flex items-center gap-1 overflow-x-auto pb-2 mb-1 scrollbar-none text-[10px]">
+                    {[
+                      { id: 'all', label: 'الكل' },
+                      { id: 'المصحف المعلم', label: 'المصحف المعلم (للتحفيظ)' },
+                      { id: 'مرتل', label: 'مرتل' },
+                      { id: 'الحرم المكي', label: 'أئمة الحرمين' },
+                      { id: 'مجود', label: 'تجويد كلاسيكي' },
+                      { id: 'رواية ورش', label: 'رواية ورش' },
+                    ].map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setReciterCategoryFilter(cat.id)}
+                        className={`px-2.5 py-1 rounded-lg whitespace-nowrap transition ${
+                          reciterCategoryFilter === cat.id
+                            ? 'bg-orange-500 text-white font-bold'
+                            : 'bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700/60'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Reciters List */}
+                  <div className="overflow-y-auto space-y-1 p-1 max-h-64 divide-y divide-zinc-800/40">
+                    {RECITERS.filter((r) => {
+                      const matchesCategory =
+                        reciterCategoryFilter === 'all' ||
+                        (reciterCategoryFilter === 'الحرم المكي' && (r.style === 'الحرم المكي' || r.style === 'الحرم النبوي')) ||
+                        (reciterCategoryFilter === 'مجود' && (r.style === 'مجود' || r.style === 'مجود خاشع')) ||
+                        r.style === reciterCategoryFilter;
+
+                      const cleanQ = reciterSearchFilter.trim().toLowerCase();
+                      const matchesSearch =
+                        !cleanQ ||
+                        r.name.toLowerCase().includes(cleanQ) ||
+                        r.subname.toLowerCase().includes(cleanQ) ||
+                        (r.style && r.style.toLowerCase().includes(cleanQ));
+
+                      return matchesCategory && matchesSearch;
+                    }).map((r) => {
+                      const isSelected = r.id === reciterId;
+                      return (
+                        <button
+                          key={r.id}
+                          onClick={() => {
+                            onSelectReciter(r.id);
+                            setShowReciterMenu(false);
+                          }}
+                          className={`w-full text-right p-2 rounded-xl text-xs flex items-center justify-between transition group ${
+                            isSelected
+                              ? 'bg-orange-500 text-white font-bold shadow-sm'
+                              : 'text-zinc-200 hover:bg-zinc-800 hover:text-white'
+                          }`}
+                        >
+                          <div className="min-w-0 flex-1 pl-2">
+                            <div className="flex items-center gap-1.5">
+                              <span className="truncate">{r.name}</span>
+                              {r.style && (
+                                <span
+                                  className={`text-[9px] px-1.5 py-0.2 rounded-md ${
+                                    isSelected
+                                      ? 'bg-orange-600 text-white'
+                                      : 'bg-zinc-800 text-orange-400/90 border border-zinc-700'
+                                  }`}
+                                >
+                                  {r.style}
+                                </span>
+                              )}
+                            </div>
+                            <div
+                              className={`text-[10px] truncate ${
+                                isSelected ? 'text-orange-100' : 'text-zinc-400'
+                              }`}
+                            >
+                              {r.subname}
+                            </div>
+                          </div>
+                          {isSelected ? (
+                            <Check className="w-4 h-4 text-white shrink-0" />
+                          ) : (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-zinc-800 text-zinc-400 shrink-0">
+                              {r.quality}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Core Playback Buttons */}
