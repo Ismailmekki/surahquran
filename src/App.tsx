@@ -12,6 +12,7 @@ import { WordMeaningsModal } from './components/WordMeaningsModal';
 import { TranslationLanguageModal } from './components/TranslationLanguageModal';
 import { TafsirModal } from './components/TafsirModal';
 import { TopPrayerBar } from './components/TopPrayerBar';
+import { PWAInstallModal } from './components/PWAInstallModal';
 
 import { ALL_JUZ_AMMA_SURAHS, getSurahById } from './data';
 import { fetchSurahTranslation } from './data/translationService';
@@ -85,6 +86,28 @@ export default function App() {
   const [isWordMeaningsOpen, setIsWordMeaningsOpen] = useState<boolean>(false);
   const [isLanguageModalOpen, setIsLanguageModalOpen] = useState<boolean>(false);
   const [selectedTafsirAyah, setSelectedTafsirAyah] = useState<Ayah | null>(null);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState<boolean>(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  // Capture PWA Install Prompt Event
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
 
   // Persistence helpers
   useEffect(() => {
@@ -425,6 +448,7 @@ export default function App() {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenWordMeanings={() => setIsWordMeaningsOpen(true)}
         onOpenDuaKhatm={() => setIsWordMeaningsOpen(true)}
+        onOpenInstallModal={() => setIsInstallModalOpen(true)}
       />
 
       {/* Main Reading & Practice Surface */}
@@ -581,6 +605,15 @@ export default function App() {
         onToggleTranslation={(val) => setShowTranslation(val)}
         onToggleTafsir={(val) => setShowTafsir(val)}
         onOpenLanguageModal={() => setIsLanguageModalOpen(true)}
+        onOpenInstallModal={() => setIsInstallModalOpen(true)}
+      />
+
+      {/* PWA Install Modal for Android & iPhone */}
+      <PWAInstallModal
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
+        deferredPrompt={deferredPrompt}
+        onInstalled={() => setDeferredPrompt(null)}
       />
 
       {/* Word Meanings (معاني الكلمات وغريب جزء عم) Modal */}

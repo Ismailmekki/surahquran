@@ -8,7 +8,9 @@ import {
   Check, 
   ChevronRight,
   ChevronLeft,
-  X
+  X,
+  Smartphone,
+  Download
 } from 'lucide-react';
 import { Surah, ViewMode } from '../types';
 import { ALL_JUZ_AMMA_SURAHS, removeDiacritics } from '../data';
@@ -24,6 +26,7 @@ interface NavbarProps {
   onOpenSettings: () => void;
   onOpenWordMeanings?: () => void;
   onOpenDuaKhatm?: () => void;
+  onOpenInstallModal?: () => void;
   onGoHome?: () => void;
 }
 
@@ -33,6 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSearch,
   onOpenBookmarks,
   onOpenSettings,
+  onOpenInstallModal,
   onGoHome,
 }) => {
   const [showSurahMenu, setShowSurahMenu] = useState<boolean>(false);
@@ -302,6 +306,20 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Left: Quick Actions & Tools */}
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+            {/* Install App Button */}
+            {onOpenInstallModal && (
+              <button
+                id="navbar-install-app-btn"
+                onClick={onOpenInstallModal}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 hover:text-amber-200 border border-amber-500/40 transition touch-manipulation group"
+                title="تنزيل وتثبيت التطبيق على هاتفك (أندرويد وآيفون)"
+                aria-label="تثبيت التطبيق"
+              >
+                <Download className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-bold hidden sm:inline">تحميل التطبيق</span>
+              </button>
+            )}
+
             {/* Search Button */}
             <button
               id="navbar-search-btn"

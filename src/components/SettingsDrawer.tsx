@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, X, Moon, Sun, Type, Sliders, Globe, Languages } from 'lucide-react';
+import { Settings, X, Moon, Sun, Type, Sliders, Globe, Languages, Smartphone, Download } from 'lucide-react';
 import { RECITERS } from '../data/reciters';
 import { AVAILABLE_LANGUAGES, TranslationLanguage } from '../data/translations';
 
@@ -21,6 +21,7 @@ interface SettingsDrawerProps {
   onToggleTranslation: (show: boolean) => void;
   onToggleTafsir: (show: boolean) => void;
   onOpenLanguageModal?: () => void;
+  onOpenInstallModal?: () => void;
 }
 
 export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
@@ -41,6 +42,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   onToggleTranslation,
   onToggleTafsir,
   onOpenLanguageModal,
+  onOpenInstallModal,
 }) => {
   if (!isOpen) return null;
 
@@ -212,6 +214,31 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
               ))}
             </select>
           </div>
+
+          {/* Install App on Phone Banner */}
+          {onOpenInstallModal && (
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-zinc-900 border border-amber-500/30 space-y-2.5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-amber-500/40 flex items-center justify-center overflow-hidden shrink-0">
+                  <img src="/icon-192.png" alt="أيقونة جزء عم" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-amber-300">تحميل وتثبيت التطبيق</h4>
+                  <p className="text-[10px] text-zinc-400">على هواتف أندرويد وآيفون (تطبيق خفيف وسريع)</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenInstallModal();
+                }}
+                className="w-full py-2.5 px-3 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-orange-950/40 transition active:scale-98"
+              >
+                <Download className="w-4 h-4" />
+                <span>طريقة التثبيت على هاتفك</span>
+              </button>
+            </div>
+          )}
 
           {/* Display Toggles */}
           <div className="space-y-3 pt-3 border-t border-zinc-800">
