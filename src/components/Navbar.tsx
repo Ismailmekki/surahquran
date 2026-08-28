@@ -10,7 +10,9 @@ import {
   ChevronLeft,
   X,
   Smartphone,
-  Download
+  Download,
+  Heart,
+  Sparkles
 } from 'lucide-react';
 import { Surah, ViewMode } from '../types';
 import { ALL_JUZ_AMMA_SURAHS, removeDiacritics } from '../data';
@@ -27,6 +29,7 @@ interface NavbarProps {
   onOpenWordMeanings?: () => void;
   onOpenDuaKhatm?: () => void;
   onOpenInstallModal?: () => void;
+  onOpenFreeWaqf?: () => void;
   onGoHome?: () => void;
 }
 
@@ -37,6 +40,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenBookmarks,
   onOpenSettings,
   onOpenInstallModal,
+  onOpenFreeWaqf,
   onGoHome,
 }) => {
   const [showSurahMenu, setShowSurahMenu] = useState<boolean>(false);
@@ -87,80 +91,89 @@ export const Navbar: React.FC<NavbarProps> = ({
   });
 
   return (
-    <header id="app-navbar" className="sticky top-0 z-40 bg-[#16181f]/95 backdrop-blur-md border-b border-zinc-800 shadow-lg transition-colors">
+    <header id="app-navbar" className="sticky top-0 z-40 bg-[#16181f]/95 backdrop-blur-md border-b border-zinc-800 shadow-lg transition-colors w-full overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-2 sm:px-4">
         {/* Top Primary Bar */}
-        <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
+        <div className="flex items-center justify-between h-13 sm:h-16 gap-1 sm:gap-2">
           
-          {/* Right: Brand Title "جزء عم" */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Right: Brand Title "جزء عم" & Free Waqf Badge */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <div 
-              className="flex items-center gap-2 cursor-pointer group" 
+              className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group" 
               onClick={onGoHome}
               role="button"
               aria-label="الرئيسية"
             >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shadow-orange-950/40 border border-amber-400/50 group-hover:scale-105 transition-transform shrink-0">
-                <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl overflow-hidden bg-zinc-900 border border-amber-400/60 shadow-md shadow-orange-950/40 group-hover:scale-105 transition-transform shrink-0 flex items-center justify-center p-0.5">
+                <img 
+                  src="/icon-192.png" 
+                  alt="أيقونة جزء عم" 
+                  className="w-full h-full object-cover rounded-lg sm:rounded-xl"
+                  referrerPolicy="no-referrer"
+                />
               </div>
-              <div className="hidden xs:block">
+              <div className="hidden md:block">
                 <div className="flex items-center gap-1.5">
-                  <h1 className="text-lg sm:text-xl font-bold font-uthmani text-amber-300 leading-tight">
+                  <h1 className="text-base sm:text-lg font-bold font-uthmani text-amber-300 leading-tight">
                     جُزْءُ عَمَّ
                   </h1>
-                  <span className="text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/40 font-arabic hidden md:inline-block">
-                    الجزء ٣٠
-                  </span>
                 </div>
               </div>
             </div>
+
+            {/* Free for the sake of Allah badge (وقف لوجه الله) */}
+            {onOpenFreeWaqf && (
+              <button
+                id="navbar-waqf-badge-btn"
+                onClick={onOpenFreeWaqf}
+                className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-300 transition shrink-0 group"
+                title="تطبيق مجاني لوجه الله تعالى (صدقة جارية)"
+              >
+                <Heart className="w-3 h-3 text-amber-400 fill-amber-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] sm:text-[11px] font-bold font-arabic whitespace-nowrap">
+                  مجاني لوجه الله
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Center: Prominent Surah Selector Button (واضح جداً في أعلى الصفحة لسهولة تغيير السورة) */}
-          <div className="relative flex-1 max-w-sm sm:max-w-md mx-1" ref={dropdownRef}>
-            <div className="flex items-center justify-center gap-1">
+          <div className="relative flex-1 max-w-[210px] sm:max-w-md mx-0.5 sm:mx-1 min-w-0" ref={dropdownRef}>
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 w-full">
               
               {/* Previous Surah Quick Button */}
               <button
                 onClick={handlePrevSurah}
                 disabled={!hasPrev}
-                className={`p-1.5 rounded-xl border border-zinc-700/80 bg-zinc-800/80 text-zinc-300 transition shrink-0 ${
-                  hasPrev ? 'hover:bg-zinc-700 hover:text-white active:scale-95' : 'opacity-40 cursor-not-allowed'
+                className={`p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-zinc-700/80 bg-zinc-800/80 text-zinc-300 transition shrink-0 ${
+                  hasPrev ? 'hover:bg-zinc-700 hover:text-white active:scale-95' : 'opacity-30 cursor-not-allowed'
                 }`}
                 title="السورة السابقة"
                 aria-label="السورة السابقة"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
 
               {/* Main Surah Switcher Button */}
               <button
                 id="top-surah-switcher-btn"
                 onClick={() => setShowSurahMenu(!showSurahMenu)}
-                className="flex-1 flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl bg-gradient-to-r from-orange-950/60 via-zinc-800 to-zinc-800/90 hover:from-orange-900/60 hover:to-zinc-700/90 border border-orange-500/50 hover:border-orange-400 text-white shadow-md shadow-black/30 transition-all touch-manipulation group"
+                className="flex-1 min-w-0 flex items-center justify-between gap-1 sm:gap-2 px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-orange-950/60 via-zinc-800 to-zinc-800/90 hover:from-orange-900/60 hover:to-zinc-700/90 border border-orange-500/50 hover:border-orange-400 text-white shadow-md shadow-black/30 transition-all touch-manipulation group"
                 title="انقر هنا لتغيير السورة"
               >
-                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-orange-500/20 text-orange-400 border border-orange-500/40 text-[10px] sm:text-xs font-bold font-uthmani flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 flex-1">
+                  <span className="w-4 h-4 sm:w-5 sm:h-5 rounded bg-orange-500/25 text-orange-300 border border-orange-500/40 text-[9px] sm:text-[11px] font-bold font-uthmani flex items-center justify-center shrink-0">
                     {toArabicNumerals(currentSurah.id)}
                   </span>
-                  <div className="text-right min-w-0">
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs sm:text-sm font-bold font-uthmani text-amber-200 group-hover:text-amber-100 truncate">
-                        سُورَةُ {currentSurah.name}
-                      </span>
-                    </div>
+                  <div className="text-right min-w-0 flex-1">
+                    <span className="text-[11px] sm:text-xs md:text-sm font-bold font-uthmani text-amber-200 group-hover:text-amber-100 truncate block">
+                      سُورَةُ {currentSurah.name}
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0">
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-orange-500 text-white font-medium shadow-xs hidden sm:inline-block">
-                    تغيير السورة
-                  </span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-orange-500/30 text-orange-300 sm:hidden">
-                    تغيير
-                  </span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-orange-400 transition-transform duration-200 ${showSurahMenu ? 'rotate-180 text-orange-300' : ''}`} />
+                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+                  <ChevronDown className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-400 transition-transform duration-200 ${showSurahMenu ? 'rotate-180 text-orange-300' : ''}`} />
                 </div>
               </button>
 
@@ -168,13 +181,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={handleNextSurah}
                 disabled={!hasNext}
-                className={`p-1.5 rounded-xl border border-zinc-700/80 bg-zinc-800/80 text-zinc-300 transition shrink-0 ${
-                  hasNext ? 'hover:bg-zinc-700 hover:text-white active:scale-95' : 'opacity-40 cursor-not-allowed'
+                className={`p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-zinc-700/80 bg-zinc-800/80 text-zinc-300 transition shrink-0 ${
+                  hasNext ? 'hover:bg-zinc-700 hover:text-white active:scale-95' : 'opacity-30 cursor-not-allowed'
                 }`}
                 title="السورة التالية"
                 aria-label="السورة التالية"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
             </div>
 
@@ -311,12 +324,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="navbar-install-app-btn"
                 onClick={onOpenInstallModal}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 hover:text-amber-200 border border-amber-500/40 transition touch-manipulation group"
+                className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 hover:text-amber-200 border border-amber-500/40 transition touch-manipulation group shrink-0"
                 title="تنزيل وتثبيت التطبيق على هاتفك (أندرويد وآيفون)"
                 aria-label="تثبيت التطبيق"
               >
-                <Download className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform" />
-                <span className="text-[11px] font-bold hidden sm:inline">تحميل التطبيق</span>
+                <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-bold hidden lg:inline">تحميل التطبيق</span>
               </button>
             )}
 
@@ -324,33 +337,33 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="navbar-search-btn"
               onClick={onOpenSearch}
-              className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/80 transition touch-manipulation"
+              className="p-1.5 sm:p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/80 transition touch-manipulation shrink-0"
               title="البحث في جزء عم"
               aria-label="البحث"
             >
-              <Search className="w-4 h-4 text-orange-400" />
+              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-400" />
             </button>
 
             {/* Bookmarks Button */}
             <button
               id="navbar-bookmarks-btn"
               onClick={onOpenBookmarks}
-              className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/80 transition touch-manipulation"
+              className="p-1.5 sm:p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/80 transition touch-manipulation shrink-0"
               title="العلامات المرجعية"
               aria-label="العلامات المرجعية"
             >
-              <BookmarkIcon className="w-4 h-4 text-amber-400" />
+              <BookmarkIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
             </button>
 
             {/* Settings Button */}
             <button
               id="navbar-settings-btn"
               onClick={onOpenSettings}
-              className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/80 transition touch-manipulation"
+              className="p-1.5 sm:p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/80 transition touch-manipulation shrink-0"
               title="الإعدادات والخطوط والقارئ"
               aria-label="الإعدادات"
             >
-              <Settings className="w-4 h-4 text-zinc-300" />
+              <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-300" />
             </button>
           </div>
         </div>
@@ -358,3 +371,4 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, X, Moon, Sun, Type, Sliders, Globe, Languages, Smartphone, Download } from 'lucide-react';
+import { Settings, X, Moon, Sun, Type, Sliders, Globe, Languages, Smartphone, Download, Heart } from 'lucide-react';
 import { RECITERS } from '../data/reciters';
 import { AVAILABLE_LANGUAGES, TranslationLanguage } from '../data/translations';
 
@@ -22,6 +22,7 @@ interface SettingsDrawerProps {
   onToggleTafsir: (show: boolean) => void;
   onOpenLanguageModal?: () => void;
   onOpenInstallModal?: () => void;
+  onOpenFreeWaqf?: () => void;
 }
 
 export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
@@ -43,6 +44,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   onToggleTafsir,
   onOpenLanguageModal,
   onOpenInstallModal,
+  onOpenFreeWaqf,
 }) => {
   if (!isOpen) return null;
 
@@ -214,6 +216,30 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
               ))}
             </select>
           </div>
+
+          {/* Free Waqf (صدقة جارية) Banner */}
+          {onOpenFreeWaqf && (
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center justify-center shrink-0">
+                  <Heart className="w-4 h-4 fill-amber-400 text-amber-400" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-amber-300">وقف لوجه الله تعالى</h4>
+                  <p className="text-[10px] text-zinc-400">تطبيق مجاني خالص وبدون أي إعلانات</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenFreeWaqf();
+                }}
+                className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold transition shrink-0"
+              >
+                عن الوقف
+              </button>
+            </div>
+          )}
 
           {/* Install App on Phone Banner */}
           {onOpenInstallModal && (

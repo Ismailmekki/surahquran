@@ -13,6 +13,7 @@ import { TranslationLanguageModal } from './components/TranslationLanguageModal'
 import { TafsirModal } from './components/TafsirModal';
 import { TopPrayerBar } from './components/TopPrayerBar';
 import { PWAInstallModal } from './components/PWAInstallModal';
+import { FreeWaqfModal } from './components/FreeWaqfModal';
 
 import { ALL_JUZ_AMMA_SURAHS, getSurahById } from './data';
 import { fetchSurahTranslation } from './data/translationService';
@@ -87,6 +88,7 @@ export default function App() {
   const [isLanguageModalOpen, setIsLanguageModalOpen] = useState<boolean>(false);
   const [selectedTafsirAyah, setSelectedTafsirAyah] = useState<Ayah | null>(null);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState<boolean>(false);
+  const [isFreeWaqfOpen, setIsFreeWaqfOpen] = useState<boolean>(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   // Capture PWA Install Prompt Event
@@ -449,6 +451,8 @@ export default function App() {
         onOpenWordMeanings={() => setIsWordMeaningsOpen(true)}
         onOpenDuaKhatm={() => setIsWordMeaningsOpen(true)}
         onOpenInstallModal={() => setIsInstallModalOpen(true)}
+        onOpenFreeWaqf={() => setIsFreeWaqfOpen(true)}
+        onGoHome={() => handleSelectSurah(ALL_JUZ_AMMA_SURAHS[0])}
       />
 
       {/* Main Reading & Practice Surface */}
@@ -606,6 +610,17 @@ export default function App() {
         onToggleTafsir={(val) => setShowTafsir(val)}
         onOpenLanguageModal={() => setIsLanguageModalOpen(true)}
         onOpenInstallModal={() => setIsInstallModalOpen(true)}
+        onOpenFreeWaqf={() => setIsFreeWaqfOpen(true)}
+      />
+
+      {/* Free Waqf (مجاني لوجه الله - صدقة جارية) Modal */}
+      <FreeWaqfModal
+        isOpen={isFreeWaqfOpen}
+        onClose={() => setIsFreeWaqfOpen(false)}
+        onOpenInstall={() => {
+          setIsFreeWaqfOpen(false);
+          setIsInstallModalOpen(true);
+        }}
       />
 
       {/* PWA Install Modal for Android & iPhone */}
